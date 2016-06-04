@@ -1,0 +1,15 @@
+#Mac OS X Files
+.DS_Store
+
+#Eclipse files
+.classpath
+.project
+.settings
+
+#Maven files
+target/**/*
+target/*
+
+#IntelliJ files
+*.iml
+.idea
