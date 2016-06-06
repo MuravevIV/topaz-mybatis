@@ -58,6 +58,18 @@ public class UserRepositoryImplTest {
         assertEquals(savedUser, foundUser);
     }
 
+    @Test
+    public void updateUserEmail() {
+        String newEmail = "john2@gmail.com";
+        User updatedUser = target.findByName("John");
+        updatedUser.setEmail(newEmail);
+        target.save(updatedUser);
+
+        User foundUser = target.findByName("John");
+
+        assertEquals(newEmail, foundUser.getEmail());
+    }
+
     private User createUser() {
         User user = new User();
         user.setName("Dan");
