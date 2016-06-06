@@ -2,12 +2,13 @@ package com.ilyamur.topaz.mybatis.repository.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Sets;
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
-import org.junit.Ignore;
+import com.ilyamur.topaz.mybatis.repository.UserRepository;
+
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,9 @@ import java.util.HashSet;
 public class UserRepositoryImplTest {
 
     @Autowired
-    private UserRepositoryImpl target;
+    private UserRepository target;
 
     @Test
-    @Ignore
     public void saveUser() {
         User user = new User();
         user.setName("Dan");

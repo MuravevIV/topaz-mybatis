@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Many;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Results;
@@ -66,6 +67,23 @@ public interface UserMapper {
             @Result(column = "name", property = "name")
     })
     Set<Role> getRoles(long idUser);
+
+    @Select({
+            "select r.id_role, r.name",
+            "from role r join user_role ur on r.id_role = ur.id_role",
+            "where ur.id_user = #{idUser}"
+    })
+    @Results({
+            @Result(column = "id_role", property = "idRole", id = true),
+            @Result(column = "name", property = "name")
+    })
+    Set<Role> findRoles(User user);
+
+    @Update("delete from user_role where id_user = #{idUser}")
+    void deleteRoles(User user);
+
+    @Update("insert into user_role (id_user, id_role) values (#{user.idUser}, #{role.idRole})")
+    void insertRole(@Param("user") User user, @Param("role") Role role);
 
     @Select({
             SELECT_ALL,
