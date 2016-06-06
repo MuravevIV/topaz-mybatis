@@ -29,8 +29,9 @@ import java.util.Set;
 @ActiveProfiles(ApplicationProfile.DEV)
 public class UserServiceImplTest {
 
-    public static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
-    public static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
+    private static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
+    private static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
+
     @Autowired
     private UserService target;
 
