@@ -1,4 +1,4 @@
-package com.ilyamur.topaz.mybatis;
+package com.ilyamur.topaz.mybatis.service;
 
 public interface DatabaseReset {
 

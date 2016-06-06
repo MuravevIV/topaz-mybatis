@@ -9,8 +9,6 @@ public interface UserService {
 
     User save(User user) throws EmailExistsException;
 
-    int updateEmail(long idUser, String newEmail);
-
     Collection<User> saveAll(Collection<User> users) throws EmailExistsException;
 
     void delete(User user);

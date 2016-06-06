@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
-import com.ilyamur.topaz.mybatis.DatabaseReset;
+import com.ilyamur.topaz.mybatis.service.DatabaseReset;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.service.UserService;

@@ -25,26 +25,18 @@ public interface UserMapper {
     String ROLE_RESULT = "roleResult";
 
     @Insert({
-            "insert into user (id_user, name, birthday)",
-            "values (#{idUser}, #{name}, #{birthday})"
+            "insert into user (id_user, name, email, birthday)",
+            "values (#{idUser}, #{name}, #{email}, #{birthday})"
     })
     @Options(useGeneratedKeys = true, keyProperty = "idUser")
     int insert(User user);
 
     @Update({
             "update user",
-            "set name = #{name}, birthday = #{birthday}",
+            "set name = #{name}, email = #{email}, birthday = #{birthday}",
             "where id_user = #{idUser}"
     })
     int update(User user);
-
-    @Update({
-            "update user",
-            "set email = #{newEmail}",
-            "where id_user = #{idUser}",
-            "and not exists (select * from user where id_user <> #{idUser} AND email = #{newEmail})"
-    })
-    int updateEmail(@Param("idUser") long idUser, @Param("newEmail") String newEmail);
 
     @Delete({
             "delete from user",
@@ -62,7 +54,7 @@ public interface UserMapper {
             @Result(column = "name", property = "name"),
             @Result(column = "email", property = "email"),
             @Result(column = "birthday", property = "birthday"),
-            @Result(column = "id_user", property = "roles", many = @Many(select = "selectRolesByIdUser"))
+            @Result(column = "id_user", property = "roles", many = @Many(select =  "selectRolesByIdUser"))
     })
     User selectByIdUser(long idUser);
 

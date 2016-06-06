@@ -1,14 +1,14 @@
 package com.ilyamur.topaz.mybatis.service.impl;
 
+import com.google.common.collect.Lists;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.mapper.UserMapper;
 import com.ilyamur.topaz.mybatis.service.UserService;
 import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
-
-import com.google.common.collect.Lists;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,8 @@ import java.util.Collection;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final String CONSTRAINT_UNIQUE_EMAIL = "U0_USER";
 
     @Autowired
     private SqlSessionTemplate sqlSessionTemplate;
@@ -34,25 +36,31 @@ public class UserServiceImpl implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public User save(User user) throws EmailExistsException {
         if (user != null) {
-            if (user.getIdUser() != null) {
-                mapper.update(user);
-                updateRoles(user);
-            } else {
-                mapper.insert(user);
-                insertRoles(user);
-            }
-            String email = user.getEmail();
-            int modCount = updateEmail(user.getIdUser(), email);
-            if (modCount == 0){
-                throw new EmailExistsException(email);
+            try {
+                updateOrInsert(user);
+            } catch (DuplicateKeyException e) {
+                if (isConstraintViolation(e, CONSTRAINT_UNIQUE_EMAIL)) {
+                    throw new EmailExistsException(user.getEmail(), e);
+                } else {
+                    throw e;
+                }
             }
         }
         return user;
     }
 
-    @Override
-    public int updateEmail(long idUser, String newEmail) {
-        return mapper.updateEmail(idUser, newEmail);
+    private boolean isConstraintViolation(DuplicateKeyException e, String constraintName) {
+        return e.getMessage().contains(String.format(" %s ", constraintName));
+    }
+
+    private void updateOrInsert(User user) {
+        if (user.getIdUser() != null) {
+            mapper.update(user);
+            updateRoles(user);
+        } else {
+            mapper.insert(user);
+            insertRoles(user);
+        }
     }
 
     private void updateRoles(User user) {
