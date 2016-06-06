@@ -22,12 +22,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 @ActiveProfiles(ApplicationProfile.DEV)
 public class UserServiceImplTest {
 
+    public static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
+    public static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
     @Autowired
     private UserService target;
 
@@ -41,7 +44,7 @@ public class UserServiceImplTest {
 
     @Test
     public void saveThenFindById() throws EmailExistsException {
-        User user = createUser("dan");
+        User user = createUserDan();
         target.save(user);
         User foundUser = target.findByIdUser(user.getIdUser());
 
@@ -51,7 +54,7 @@ public class UserServiceImplTest {
 
     @Test
     public void saveThenFindByName() throws EmailExistsException {
-        User user = createUser("dan");
+        User user = createUserDan();
         target.save(user);
         User foundUser = target.findByName(user.getName());
 
@@ -68,7 +71,7 @@ public class UserServiceImplTest {
 
     @Test
     public void updateUserEmail() throws EmailExistsException {
-        String newEmail = "john2@gmail.com";
+        String newEmail = "johnalt@gmail.com";
         User updatedUser = target.findByName("John");
         updatedUser.setEmail(newEmail);
         target.save(updatedUser);
@@ -81,24 +84,23 @@ public class UserServiceImplTest {
     @Test(expected = EmailExistsException.class)
     public void updateUserEmailConflict() throws EmailExistsException {
         String sameEmail = "steve@gmail.com";
-        User userSteve = createUser("steve");
-        userSteve.setEmail(sameEmail);
-        User userStevo = createUser("stevo");
-        userStevo.setEmail(sameEmail);
+        User userSteven = createUser("Steven", sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        User userStephen = createUser("Stephen", sameEmail, ANY_BIRTHDAY, ANY_ROLES);
 
-        target.save(userSteve);
-        target.save(userStevo);
+        target.save(userSteven);
+        target.save(userStephen);
     }
 
-    private User createUser(String name) {
+    private User createUser(String name, String email, LocalDate birthday, Set<Role> roles) {
         User user = new User();
         user.setName(name);
-        user.setEmail(name + "@gmail.com");
-        user.setBirthday(LocalDate.of(1990, Month.APRIL, 14));
-        HashSet<Role> roles = Sets.newHashSet();
-        roles.add(Role.REGISTERED_USER);
-        roles.add(Role.ADMIN);
+        user.setEmail(email);
+        user.setBirthday(birthday);
         user.setRoles(roles);
         return user;
+    }
+
+    private User createUserDan() {
+        return createUser("Dan", "dan@gmail.com", ANY_BIRTHDAY, ANY_ROLES);
     }
 }

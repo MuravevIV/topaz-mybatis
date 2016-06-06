@@ -20,7 +20,7 @@ import java.util.Collection;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String CONSTRAINT_UNIQUE_EMAIL = "U0_USER";
+    private static final String CONSTRAINT_UNIQUE_EMAIL = "U0_USER_EMAIL";
 
     @Autowired
     private SqlSessionTemplate sqlSessionTemplate;
@@ -47,31 +47,6 @@ public class UserServiceImpl implements UserService {
             }
         }
         return user;
-    }
-
-    private boolean isConstraintViolation(DuplicateKeyException e, String constraintName) {
-        return e.getMessage().contains(String.format(" %s ", constraintName));
-    }
-
-    private void updateOrInsert(User user) {
-        if (user.getIdUser() != null) {
-            mapper.update(user);
-            updateRoles(user);
-        } else {
-            mapper.insert(user);
-            insertRoles(user);
-        }
-    }
-
-    private void updateRoles(User user) {
-        mapper.deleteRoles(user);
-        insertRoles(user);
-    }
-
-    private void insertRoles(User user) {
-        for (Role role : user.getRoles()) {
-            mapper.insertRole(user, role);
-        }
     }
 
     @Override
@@ -102,5 +77,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<User> getAll() {
         return mapper.selectAll();
+    }
+
+    private void updateOrInsert(User user) {
+        if (user.getIdUser() != null) {
+            mapper.update(user);
+            updateRoles(user);
+        } else {
+            mapper.insert(user);
+            insertRoles(user);
+        }
+    }
+
+    private void updateRoles(User user) {
+        mapper.deleteRoles(user);
+        insertRoles(user);
+    }
+
+    private void insertRoles(User user) {
+        for (Role role : user.getRoles()) {
+            mapper.insertRole(user, role);
+        }
+    }
+
+    private boolean isConstraintViolation(DuplicateKeyException e, String constraintName) {
+        return e.getMessage().contains(String.format(" %s ", constraintName));
     }
 }

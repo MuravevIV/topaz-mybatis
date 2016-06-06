@@ -2,10 +2,12 @@ package com.ilyamur.topaz.mybatis.service.exception;
 
 public class EmailExistsException extends Exception {
 
+    private static final String MESSAGE = "Email '%s' already exists in database.";
+
     private String message;
 
     public EmailExistsException(String email) {
-        this.message = String.format("Email '%s' already exists in database.", email);
+        this.message = String.format(MESSAGE, email);
     }
 
     public EmailExistsException(String email, Throwable cause) {

@@ -15,13 +15,15 @@ import javax.sql.DataSource;
 @Import(DataSourceConfiguration.class)
 public class MybatisConfiguration {
 
+    public static final String MYBATIS_CONFIG_XML = "mybatis/config.xml";
+
     @Autowired
     private DataSource dataSource;
 
     @Bean
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
-        sqlSessionFactory.setConfigLocation(new ClassPathResource("mybatis/config.xml"));
+        sqlSessionFactory.setConfigLocation(new ClassPathResource(MYBATIS_CONFIG_XML));
         sqlSessionFactory.setDataSource(dataSource);
         return sqlSessionFactory.getObject();
     }
