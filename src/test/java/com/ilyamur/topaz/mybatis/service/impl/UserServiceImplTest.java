@@ -1,4 +1,4 @@
-package com.ilyamur.topaz.mybatis.repository.impl;
+package com.ilyamur.topaz.mybatis.service.impl;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +7,8 @@ import com.ilyamur.topaz.mybatis.ApplicationProfile;
 import com.ilyamur.topaz.mybatis.DatabaseReset;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
-import com.ilyamur.topaz.mybatis.repository.UserRepository;
+import com.ilyamur.topaz.mybatis.service.UserService;
+import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
 
 import com.google.common.collect.Sets;
 import org.junit.Before;
@@ -25,10 +26,10 @@ import java.util.HashSet;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 @ActiveProfiles(ApplicationProfile.DEV)
-public class UserRepositoryImplTest {
+public class UserServiceImplTest {
 
     @Autowired
-    private UserRepository target;
+    private UserService target;
 
     @Autowired
     private DatabaseReset databaseReset;
@@ -39,27 +40,34 @@ public class UserRepositoryImplTest {
     }
 
     @Test
-    public void saveThenFindById() {
-        User user = createUser();
-        User savedUser = target.save(user);
-        User foundUser = target.findByIdUser(savedUser.getIdUser());
+    public void saveThenFindById() throws EmailExistsException {
+        User user = createUser("dan");
+        target.save(user);
+        User foundUser = target.findByIdUser(user.getIdUser());
 
-        assertEquals(savedUser.getIdUser(), user.getIdUser());
-        assertEquals(savedUser, foundUser);
+        assertEquals(user.getIdUser(), user.getIdUser());
+        assertEquals(user, foundUser);
     }
 
     @Test
-    public void saveThenFindByName() {
-        User user = createUser();
-        User savedUser = target.save(user);
-        User foundUser = target.findByName(savedUser.getName());
+    public void saveThenFindByName() throws EmailExistsException {
+        User user = createUser("dan");
+        target.save(user);
+        User foundUser = target.findByName(user.getName());
 
-        assertEquals(savedUser.getIdUser(), user.getIdUser());
-        assertEquals(savedUser, foundUser);
+        assertEquals(user.getIdUser(), user.getIdUser());
+        assertEquals(user, foundUser);
     }
 
     @Test
-    public void updateUserEmail() {
+    public void findThenSaveUser() throws EmailExistsException {
+        User updatedUser = target.findByName("John");
+        User savedUser = target.save(updatedUser);
+        assertEquals(updatedUser, savedUser);
+    }
+
+    @Test
+    public void updateUserEmail() throws EmailExistsException {
         String newEmail = "john2@gmail.com";
         User updatedUser = target.findByName("John");
         updatedUser.setEmail(newEmail);
@@ -70,10 +78,22 @@ public class UserRepositoryImplTest {
         assertEquals(newEmail, foundUser.getEmail());
     }
 
-    private User createUser() {
+    @Test(expected = EmailExistsException.class)
+    public void updateUserEmailConflict() throws EmailExistsException {
+        String sameEmail = "steve@gmail.com";
+        User userSteve = createUser("steve");
+        userSteve.setEmail(sameEmail);
+        User userStevo = createUser("stevo");
+        userStevo.setEmail(sameEmail);
+
+        target.save(userSteve);
+        target.save(userStevo);
+    }
+
+    private User createUser(String name) {
         User user = new User();
-        user.setName("Dan");
-        user.setEmail("dan@gmail.com");
+        user.setName(name);
+        user.setEmail(name + "@gmail.com");
         user.setBirthday(LocalDate.of(1990, Month.APRIL, 14));
         HashSet<Role> roles = Sets.newHashSet();
         roles.add(Role.REGISTERED_USER);
