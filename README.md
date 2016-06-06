@@ -1,5 +1,4 @@
-
-# Cookbook example of proper "Mybatis + Spring" data layer maven module
+# Cookbook example of proper mybatis + spring data layer module
 
 Features:
 
@@ -11,3 +10,7 @@ Features:
  * Spring Profiles (dev/production)
  * Acceptance tests (HSQLDB)
  * Mutation tests (Pitest)
+
+How to:
+
+Just ```mvn clean test```
