@@ -54,9 +54,17 @@ public interface UserMapper {
             @Result(column = "name", property = "name"),
             @Result(column = "email", property = "email"),
             @Result(column = "birthday", property = "birthday"),
-            @Result(column = "id_user", property = "roles", javaType = Set.class, many = @Many(select = "selectRolesByIdUser"))
+            @Result(column = "id_user", property = "roles", many = @Many(select = "selectRolesByIdUser"))
     })
     User selectByIdUser(long idUser);
+
+    @Select({
+            SELECT_ALL,
+            FROM_USER,
+            "where name = #{name}"
+    })
+    @ResultMap(USER_RESULT)
+    User findByName(String name);
 
     @Select({
             "select r.id_role, r.name",

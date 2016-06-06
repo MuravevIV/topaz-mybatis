@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
+import com.ilyamur.topaz.mybatis.DatabaseReset;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.repository.UserRepository;
 
 import com.google.common.collect.Sets;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,35 @@ public class UserRepositoryImplTest {
     @Autowired
     private UserRepository target;
 
+    @Autowired
+    private DatabaseReset databaseReset;
+
+    @Before
+    public void before() {
+        databaseReset.apply();
+    }
+
     @Test
     public void saveThenFindById() {
+        User user = createUser();
+        User savedUser = target.save(user);
+        User foundUser = target.findByIdUser(savedUser.getIdUser());
+
+        assertEquals(savedUser.getIdUser(), user.getIdUser());
+        assertEquals(savedUser, foundUser);
+    }
+
+    @Test
+    public void saveThenFindByName() {
+        User user = createUser();
+        User savedUser = target.save(user);
+        User foundUser = target.findByName(savedUser.getName());
+
+        assertEquals(savedUser.getIdUser(), user.getIdUser());
+        assertEquals(savedUser, foundUser);
+    }
+
+    private User createUser() {
         User user = new User();
         user.setName("Dan");
         user.setEmail("dan@gmail.com");
@@ -38,11 +67,6 @@ public class UserRepositoryImplTest {
         roles.add(Role.REGISTERED_USER);
         roles.add(Role.ADMIN);
         user.setRoles(roles);
-        User savedUser = target.save(user);
-        Long idUser = savedUser.getIdUser();
-        User foundUser = target.findByIdUser(idUser);
-
-        assertEquals(savedUser.getIdUser(), user.getIdUser());
-        assertEquals(savedUser, foundUser);
+        return user;
     }
 }
