@@ -60,27 +60,22 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void delete(long idUser) {
-        mapper.delete(idUser);
+    public void delete(User user) {
+        mapper.delete(user);
     }
 
     @Override
-    public User findById(long idUser) {
-        return mapper.findById(idUser);
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        return mapper.findByEmail(email);
+    public User findByIdUser(long idUser) {
+        return mapper.selectByIdUser(idUser);
     }
 
     @Override
     public User findByName(String name) {
-        return mapper.findByName(name);
+        return mapper.selectByName(name);
     }
 
     @Override
     public Collection<User> getAll() {
-        return mapper.getAll();
+        return mapper.selectAll();
     }
 }

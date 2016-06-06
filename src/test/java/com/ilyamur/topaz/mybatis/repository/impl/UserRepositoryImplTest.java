@@ -29,7 +29,7 @@ public class UserRepositoryImplTest {
     private UserRepository target;
 
     @Test
-    public void saveUser() {
+    public void saveThenFindById() {
         User user = new User();
         user.setName("Dan");
         user.setEmail("dan@gmail.com");
@@ -40,7 +40,7 @@ public class UserRepositoryImplTest {
         user.setRoles(roles);
         User savedUser = target.save(user);
         Long idUser = savedUser.getIdUser();
-        User foundUser = target.findById(idUser);
+        User foundUser = target.findByIdUser(idUser);
 
         assertEquals(savedUser.getIdUser(), user.getIdUser());
         assertEquals(savedUser, foundUser);

@@ -2,6 +2,7 @@ package com.ilyamur.topaz.mybatis.mapper;
 
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Many;
@@ -39,9 +40,9 @@ public interface UserMapper {
 
     @Delete({
             "delete from user",
-            "where id_user = #{id_user}"
+            "where id_user = #{idUser}"
     })
-    void delete(long id);
+    void delete(User user);
 
     @Select({
             SELECT_ALL,
@@ -53,9 +54,9 @@ public interface UserMapper {
             @Result(column = "name", property = "name"),
             @Result(column = "email", property = "email"),
             @Result(column = "birthday", property = "birthday"),
-            @Result(column = "id_user", property = "roles", javaType = Set.class, many = @Many(select = "getRoles"))
+            @Result(column = "id_user", property = "roles", javaType = Set.class, many = @Many(select = "selectRolesByIdUser"))
     })
-    User findById(long idUser);
+    User selectByIdUser(long idUser);
 
     @Select({
             "select r.id_role, r.name",
@@ -66,32 +67,14 @@ public interface UserMapper {
             @Result(column = "id_role", property = "idRole", id = true),
             @Result(column = "name", property = "name")
     })
-    Set<Role> getRoles(long idUser);
-
-    @Select({
-            "select r.id_role, r.name",
-            "from role r join user_role ur on r.id_role = ur.id_role",
-            "where ur.id_user = #{idUser}"
-    })
-    @Results({
-            @Result(column = "id_role", property = "idRole", id = true),
-            @Result(column = "name", property = "name")
-    })
-    Set<Role> findRoles(User user);
+    Set<Role> selectRolesByIdUser(long idUser);
 
     @Update("delete from user_role where id_user = #{idUser}")
     void deleteRoles(User user);
 
     @Update("insert into user_role (id_user, id_role) values (#{user.idUser}, #{role.idRole})")
-    void insertRole(@Param("user") User user, @Param("role") Role role);
-
-    @Select({
-            SELECT_ALL,
-            FROM_USER,
-            "where email = #{email}"
-    })
-    @ResultMap(USER_RESULT)
-    User findByEmail(String email);
+    void insertRole(@Param("user") User user,
+                    @Param("role") Role role);
 
     @Select({
             SELECT_ALL,
@@ -99,12 +82,12 @@ public interface UserMapper {
             "where name = #{name}"
     })
     @ResultMap(USER_RESULT)
-    User findByName(String name);
+    User selectByName(String name);
 
     @Select({
             SELECT_ALL,
             FROM_USER
     })
     @ResultMap(USER_RESULT)
-    Collection<User> getAll();
+    Collection<User> selectAll();
 }

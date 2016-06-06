@@ -10,11 +10,9 @@ public interface UserRepository {
 
     Collection<User> saveAll(Collection<User> users);
 
-    void delete(long idUser);
+    void delete(User user);
 
-    User findById(long idUser);
-
-    User findByEmail(String email);
+    User findByIdUser(long idUser);
 
     User findByName(String name);
 
