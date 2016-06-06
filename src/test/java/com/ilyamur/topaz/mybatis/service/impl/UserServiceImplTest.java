@@ -1,6 +1,9 @@
 package com.ilyamur.topaz.mybatis.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
@@ -82,14 +85,27 @@ public class UserServiceImplTest {
         assertEquals(newEmail, foundUser.getEmail());
     }
 
-    @Test(expected = EmailExistsException.class)
+    @Test
     public void updateUserEmailConflict() throws EmailExistsException {
-        String sameEmail = "steve@gmail.com";
-        User userSteven = createUser("Steven", sameEmail, ANY_BIRTHDAY, ANY_ROLES);
-        User userStephen = createUser("Stephen", sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String sameEmail = "same@gmail.com";
 
-        target.save(userSteven);
-        target.save(userStephen);
+        String userAbbyName = "Abby";
+        User userAbby = createUser(userAbbyName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        target.save(userAbby);
+
+        String userBrianName = "Brian";
+        User userBrian = createUser(userBrianName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        EmailExistsException exc = null;
+        try {
+            target.save(userBrian);
+        } catch (EmailExistsException e) {
+            exc = e;
+        }
+
+        assertNotNull("EmailExistsException expected", exc);
+        assertEquals(String.format(EmailExistsException.MESSAGE, sameEmail), exc.getMessage());
+        assertNotNull("User SHOULD be persisted in database", target.findByName(userAbbyName));
+        assertNull("User SHOULD NOT be persisted in database", target.findByName(userBrianName));
     }
 
     private User createUser(String name, String email, LocalDate birthday, Set<Role> roles) {
