@@ -14,3 +14,5 @@ Features:
 How to:
 
 Just ```mvn clean test```
+
+Also see *pitest* profile in pom.xml
