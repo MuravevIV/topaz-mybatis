@@ -5,6 +5,7 @@ import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.mapper.UserMapper;
 import com.ilyamur.topaz.mybatis.service.UserService;
 import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
+import com.ilyamur.topaz.mybatis.service.exception.LoginExistsException;
 
 import com.google.common.collect.Lists;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -20,6 +21,7 @@ import java.util.Collection;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String CONSTRAINT_UNIQUE_LOGIN = "U0_USER_LOGIN";
     private static final String CONSTRAINT_UNIQUE_EMAIL = "U0_USER_EMAIL";
 
     @Autowired
@@ -33,14 +35,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = EmailExistsException.class)
-    public User save(User user) throws EmailExistsException {
+    @Transactional(rollbackFor = {LoginExistsException.class, EmailExistsException.class})
+    public User save(User user) throws LoginExistsException, EmailExistsException {
         if (user != null) {
             try {
                 updateOrInsert(user);
             } catch (DuplicateKeyException e) {
                 if (isConstraintViolation(e, CONSTRAINT_UNIQUE_EMAIL)) {
                     throw new EmailExistsException(user.getEmail(), e);
+                } else if (isConstraintViolation(e, CONSTRAINT_UNIQUE_LOGIN)) {
+                    throw new LoginExistsException(user.getLogin(), e);
                 } else {
                     throw e;
                 }
@@ -50,8 +54,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = EmailExistsException.class)
-    public Collection<User> saveAll(Collection<User> users) throws EmailExistsException {
+    @Transactional(rollbackFor = {LoginExistsException.class, EmailExistsException.class})
+    public Collection<User> saveAll(Collection<User> users) throws LoginExistsException, EmailExistsException {
         ArrayList<User> savedUsers = Lists.newArrayList();
         for (User user : users) {
             savedUsers.add(save(user));

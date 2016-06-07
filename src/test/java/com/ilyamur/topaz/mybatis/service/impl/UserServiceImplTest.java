@@ -1,8 +1,10 @@
 package com.ilyamur.topaz.mybatis.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
@@ -11,6 +13,7 @@ import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.service.DatabaseReset;
 import com.ilyamur.topaz.mybatis.service.UserService;
 import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
+import com.ilyamur.topaz.mybatis.service.exception.LoginExistsException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -24,6 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,7 +55,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveThenFindByIdUser() throws EmailExistsException {
+    public void saveThenFindByIdUser() throws LoginExistsException, EmailExistsException {
         User user = createAnyUser();
         User savedUser = target.save(user);
         User foundUser = target.findByIdUser(user.getIdUser());
@@ -61,7 +65,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveThenFindByLogin() throws EmailExistsException {
+    public void saveThenFindByLogin() throws LoginExistsException, EmailExistsException {
         User user = createAnyUser();
         User savedUser = target.save(user);
         User foundUser = target.findByLogin(user.getLogin());
@@ -71,7 +75,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void findByIdUserThenSave() throws EmailExistsException {
+    public void findByIdUserThenSave() throws LoginExistsException, EmailExistsException {
         User foundUser = target.findByIdUser(EXISTING_ID_USER);
         User savedUser = target.save(foundUser);
 
@@ -79,7 +83,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void findByLoginThenSave() throws EmailExistsException {
+    public void findByLoginThenSave() throws LoginExistsException, EmailExistsException {
         User foundUser = target.findByLogin(EXISTING_LOGIN);
         User savedUser = target.save(foundUser);
 
@@ -87,7 +91,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void updateEmail() throws EmailExistsException {
+    public void updateEmail() throws LoginExistsException, EmailExistsException {
         String newEmail = "johnalt@gmail.com";
         User updatedUser = target.findByLogin(EXISTING_LOGIN);
         updatedUser.setEmail(newEmail);
@@ -99,7 +103,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void updateBirthday() throws EmailExistsException {
+    public void updateBirthday() throws LoginExistsException, EmailExistsException {
         LocalDate newBirthday = LocalDate.of(1985, Month.DECEMBER, 5);
         User updatedUser = target.findByLogin(EXISTING_LOGIN);
         updatedUser.setBirthday(newBirthday);
@@ -111,7 +115,54 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveTwoUsersWithSameEmailSequentially_savesOnlyFirstUserAndThrowsEmailExistsException() throws EmailExistsException {
+    public void saveTwoUsersWithSameLoginSequentially_savesOnlyFirstUserAndThrowsLoginExistsException()
+            throws LoginExistsException, EmailExistsException {
+
+        String sameLogin = "BigBy";
+        User userAbby = createUser(sameLogin, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
+        User userBrian = createUser(sameLogin, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
+
+        target.save(userAbby);
+        LoginExistsException exc = null;
+        try {
+            target.save(userBrian);
+        } catch (LoginExistsException e) {
+            exc = e;
+        }
+
+        assertNotNull("LoginExistsException expected", exc);
+        assertEquals(String.format(LoginExistsException.MESSAGE, sameLogin), exc.getMessage());
+        Collection<User> users = target.getAll();
+        assertTrue("User SHOULD be persisted in database", users.contains(userAbby));
+        assertFalse("User SHOULD NOT be persisted in database", users.contains(userBrian));
+    }
+
+    @Test
+    public void saveTwoUsersWithSameLoginSimultaneously_savesOnlyFirstUserAndThrowsLoginExistsException()
+            throws LoginExistsException, EmailExistsException {
+
+        String sameLogin = "BigBy";
+        User userAbby = createUser(sameLogin, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
+        User userBrian = createUser(sameLogin, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
+
+        LoginExistsException exc = null;
+        try {
+            target.saveAll(Lists.newArrayList(userAbby, userBrian));
+        } catch (LoginExistsException e) {
+            exc = e;
+        }
+
+        assertNotNull("LoginExistsException expected", exc);
+        assertEquals(String.format(LoginExistsException.MESSAGE, sameLogin), exc.getMessage());
+        Collection<User> users = target.getAll();
+        assertFalse("User SHOULD NOT be persisted in database", users.contains(userAbby));
+        assertFalse("User SHOULD NOT be persisted in database", users.contains(userBrian));
+    }
+
+    @Test
+    public void saveTwoUsersWithSameEmailSequentially_savesOnlyFirstUserAndThrowsEmailExistsException()
+            throws LoginExistsException, EmailExistsException {
+
         String sameEmail = "same@gmail.com";
         String userAbbyLogin = "Abby";
         User userAbby = createUser(userAbbyLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
@@ -133,7 +184,9 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveTwoUsersWithSameEmailSimultaneously_doNotSaveAnyUserAndThrowsEmailExistsException() throws EmailExistsException {
+    public void saveTwoUsersWithSameEmailSimultaneously_doNotSaveAnyUserAndThrowsEmailExistsException()
+            throws LoginExistsException, EmailExistsException {
+
         String sameEmail = "same@gmail.com";
         String userAbbyLogin = "Abby";
         User userAbby = createUser(userAbbyLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
