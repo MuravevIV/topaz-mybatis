@@ -32,6 +32,10 @@ import java.util.Set;
 @ActiveProfiles(ApplicationProfile.DEV)
 public class UserServiceImplTest {
 
+    private static final int EXISTING_ID_USER = 0;
+    private static final String EXISTING_NAME = "John";
+    private static final String ANY_NAME = "Dan";
+    private static final String ANY_EMAIL = "dan@gmail.com";
     private static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
     private static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
 
@@ -47,46 +51,67 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveThenFindById() throws EmailExistsException {
-        User user = createUserDan();
-        target.save(user);
+    public void saveThenFindByIdUser() throws EmailExistsException {
+        User user = createAnyUser();
+        User savedUser = target.save(user);
         User foundUser = target.findByIdUser(user.getIdUser());
 
-        assertEquals(user.getIdUser(), user.getIdUser());
-        assertEquals(user, foundUser);
+        assertEquals(user.getIdUser(), savedUser.getIdUser());
+        assertEquals(savedUser, foundUser);
     }
 
     @Test
     public void saveThenFindByName() throws EmailExistsException {
-        User user = createUserDan();
-        target.save(user);
+        User user = createAnyUser();
+        User savedUser = target.save(user);
         User foundUser = target.findByName(user.getName());
 
-        assertEquals(user.getIdUser(), user.getIdUser());
-        assertEquals(user, foundUser);
+        assertEquals(user.getIdUser(), savedUser.getIdUser());
+        assertEquals(savedUser, foundUser);
     }
 
     @Test
-    public void findThenSaveUser() throws EmailExistsException {
-        User updatedUser = target.findByName("John");
-        User savedUser = target.save(updatedUser);
-        assertEquals(updatedUser, savedUser);
+    public void findByIdUserThenSave() throws EmailExistsException {
+        User foundUser = target.findByIdUser(EXISTING_ID_USER);
+        User savedUser = target.save(foundUser);
+
+        assertEquals(foundUser, savedUser);
     }
 
     @Test
-    public void updateUserEmail() throws EmailExistsException {
+    public void findByNameThenSave() throws EmailExistsException {
+        User foundUser = target.findByName(EXISTING_NAME);
+        User savedUser = target.save(foundUser);
+
+        assertEquals(foundUser, savedUser);
+    }
+
+    @Test
+    public void updateEmail() throws EmailExistsException {
         String newEmail = "johnalt@gmail.com";
-        User updatedUser = target.findByName("John");
+        User updatedUser = target.findByName(EXISTING_NAME);
         updatedUser.setEmail(newEmail);
         target.save(updatedUser);
 
-        User foundUser = target.findByName("John");
+        User foundUser = target.findByName(EXISTING_NAME);
 
         assertEquals(newEmail, foundUser.getEmail());
     }
 
     @Test
-    public void updateUserEmailConflict() throws EmailExistsException {
+    public void updateBirthday() throws EmailExistsException {
+        LocalDate newBirthday = LocalDate.of(1985, Month.DECEMBER, 5);
+        User updatedUser = target.findByName(EXISTING_NAME);
+        updatedUser.setBirthday(newBirthday);
+        target.save(updatedUser);
+
+        User foundUser = target.findByName(EXISTING_NAME);
+
+        assertEquals(newBirthday, foundUser.getBirthday());
+    }
+
+    @Test
+    public void saveTwoUsersWithSameEmail_throwsEmailExistsException() throws EmailExistsException {
         String sameEmail = "same@gmail.com";
 
         String userAbbyName = "Abby";
@@ -117,7 +142,7 @@ public class UserServiceImplTest {
         return user;
     }
 
-    private User createUserDan() {
-        return createUser("Dan", "dan@gmail.com", ANY_BIRTHDAY, ANY_ROLES);
+    private User createAnyUser() {
+        return createUser(ANY_NAME, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
     }
 }
