@@ -33,8 +33,8 @@ import java.util.Set;
 public class UserServiceImplTest {
 
     private static final int EXISTING_ID_USER = 0;
-    private static final String EXISTING_NAME = "John";
-    private static final String ANY_NAME = "Dan";
+    private static final String EXISTING_LOGIN = "John";
+    private static final String ANY_LOGIN = "Dan";
     private static final String ANY_EMAIL = "dan@gmail.com";
     private static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
     private static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
@@ -61,10 +61,10 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveThenFindByName() throws EmailExistsException {
+    public void saveThenFindByLogin() throws EmailExistsException {
         User user = createAnyUser();
         User savedUser = target.save(user);
-        User foundUser = target.findByName(user.getName());
+        User foundUser = target.findByLogin(user.getLogin());
 
         assertEquals(user.getIdUser(), savedUser.getIdUser());
         assertEquals(savedUser, foundUser);
@@ -79,8 +79,8 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void findByNameThenSave() throws EmailExistsException {
-        User foundUser = target.findByName(EXISTING_NAME);
+    public void findByLoginThenSave() throws EmailExistsException {
+        User foundUser = target.findByLogin(EXISTING_LOGIN);
         User savedUser = target.save(foundUser);
 
         assertEquals(foundUser, savedUser);
@@ -89,11 +89,11 @@ public class UserServiceImplTest {
     @Test
     public void updateEmail() throws EmailExistsException {
         String newEmail = "johnalt@gmail.com";
-        User updatedUser = target.findByName(EXISTING_NAME);
+        User updatedUser = target.findByLogin(EXISTING_LOGIN);
         updatedUser.setEmail(newEmail);
         target.save(updatedUser);
 
-        User foundUser = target.findByName(EXISTING_NAME);
+        User foundUser = target.findByLogin(EXISTING_LOGIN);
 
         assertEquals(newEmail, foundUser.getEmail());
     }
@@ -101,11 +101,11 @@ public class UserServiceImplTest {
     @Test
     public void updateBirthday() throws EmailExistsException {
         LocalDate newBirthday = LocalDate.of(1985, Month.DECEMBER, 5);
-        User updatedUser = target.findByName(EXISTING_NAME);
+        User updatedUser = target.findByLogin(EXISTING_LOGIN);
         updatedUser.setBirthday(newBirthday);
         target.save(updatedUser);
 
-        User foundUser = target.findByName(EXISTING_NAME);
+        User foundUser = target.findByLogin(EXISTING_LOGIN);
 
         assertEquals(newBirthday, foundUser.getBirthday());
     }
@@ -113,10 +113,10 @@ public class UserServiceImplTest {
     @Test
     public void saveTwoUsersWithSameEmailSequentially_savesOnlyFirstUserAndThrowsEmailExistsException() throws EmailExistsException {
         String sameEmail = "same@gmail.com";
-        String userAbbyName = "Abby";
-        User userAbby = createUser(userAbbyName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
-        String userBrianName = "Brian";
-        User userBrian = createUser(userBrianName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String userAbbyLogin = "Abby";
+        User userAbby = createUser(userAbbyLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String userBrianLogin = "Brian";
+        User userBrian = createUser(userBrianLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
 
         target.save(userAbby);
         EmailExistsException exc = null;
@@ -128,17 +128,17 @@ public class UserServiceImplTest {
 
         assertNotNull("EmailExistsException expected", exc);
         assertEquals(String.format(EmailExistsException.MESSAGE, sameEmail), exc.getMessage());
-        assertNotNull("User SHOULD be persisted in database", target.findByName(userAbbyName));
-        assertNull("User SHOULD NOT be persisted in database", target.findByName(userBrianName));
+        assertNotNull("User SHOULD be persisted in database", target.findByLogin(userAbbyLogin));
+        assertNull("User SHOULD NOT be persisted in database", target.findByLogin(userBrianLogin));
     }
 
     @Test
     public void saveTwoUsersWithSameEmailSimultaneously_doNotSaveAnyUserAndThrowsEmailExistsException() throws EmailExistsException {
         String sameEmail = "same@gmail.com";
-        String userAbbyName = "Abby";
-        User userAbby = createUser(userAbbyName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
-        String userBrianName = "Brian";
-        User userBrian = createUser(userBrianName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String userAbbyLogin = "Abby";
+        User userAbby = createUser(userAbbyLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String userBrianLogin = "Brian";
+        User userBrian = createUser(userBrianLogin, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
 
         EmailExistsException exc = null;
         try {
@@ -149,13 +149,13 @@ public class UserServiceImplTest {
 
         assertNotNull("EmailExistsException expected", exc);
         assertEquals(String.format(EmailExistsException.MESSAGE, sameEmail), exc.getMessage());
-        assertNull("User SHOULD NOT be persisted in database", target.findByName(userAbbyName));
-        assertNull("User SHOULD NOT be persisted in database", target.findByName(userBrianName));
+        assertNull("User SHOULD NOT be persisted in database", target.findByLogin(userAbbyLogin));
+        assertNull("User SHOULD NOT be persisted in database", target.findByLogin(userBrianLogin));
     }
 
-    private User createUser(String name, String email, LocalDate birthday, Set<Role> roles) {
+    private User createUser(String login, String email, LocalDate birthday, Set<Role> roles) {
         User user = new User();
-        user.setName(name);
+        user.setLogin(login);
         user.setEmail(email);
         user.setBirthday(birthday);
         user.setRoles(roles);
@@ -163,6 +163,6 @@ public class UserServiceImplTest {
     }
 
     private User createAnyUser() {
-        return createUser(ANY_NAME, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
+        return createUser(ANY_LOGIN, ANY_EMAIL, ANY_BIRTHDAY, ANY_ROLES);
     }
 }

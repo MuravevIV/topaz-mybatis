@@ -9,7 +9,7 @@ import java.util.Set;
 public class User {
 
     private Long idUser;
-    private String name;
+    private String login;
     private String email;
     private LocalDate birthday;
     private Set<Role> roles;
@@ -22,12 +22,12 @@ public class User {
         this.idUser = idUser;
     }
 
-    public String getName() {
-        return name;
+    public String getLogin() {
+        return login;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getEmail() {
@@ -58,7 +58,7 @@ public class User {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("idUser", idUser)
-                .add("name", name)
+                .add("login", login)
                 .add("email", email)
                 .add("birthday", birthday)
                 .add("roles", roles)
@@ -71,7 +71,7 @@ public class User {
         if (!(o instanceof User)) return false;
         User user = (User) o;
         return Objects.equal(idUser, user.idUser) &&
-                Objects.equal(name, user.name) &&
+                Objects.equal(login, user.login) &&
                 Objects.equal(email, user.email) &&
                 Objects.equal(birthday, user.birthday) &&
                 Objects.equal(roles, user.roles);
@@ -79,6 +79,6 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(idUser, name, email, birthday, roles);
+        return Objects.hashCode(idUser, login, email, birthday, roles);
     }
 }

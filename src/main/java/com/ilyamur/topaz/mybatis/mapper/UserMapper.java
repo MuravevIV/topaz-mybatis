@@ -19,21 +19,21 @@ import java.util.Set;
 
 public interface UserMapper {
 
-    String SELECT_ALL = "select id_user, name, email, birthday";
+    String SELECT_ALL = "select id_user, login, email, birthday";
     String FROM_USER = "from user";
     String USER_RESULT = "userResult";
     String ROLE_RESULT = "roleResult";
 
     @Insert({
-            "insert into user (id_user, name, email, birthday)",
-            "values (#{idUser}, #{name}, #{email}, #{birthday})"
+            "insert into user (id_user, login, email, birthday)",
+            "values (#{idUser}, #{login}, #{email}, #{birthday})"
     })
     @Options(useGeneratedKeys = true, keyProperty = "idUser")
     int insert(User user);
 
     @Update({
             "update user",
-            "set name = #{name}, email = #{email}, birthday = #{birthday}",
+            "set login = #{login}, email = #{email}, birthday = #{birthday}",
             "where id_user = #{idUser}"
     })
     int update(User user);
@@ -51,7 +51,7 @@ public interface UserMapper {
     })
     @Results(id = USER_RESULT, value = {
             @Result(column = "id_user", property = "idUser", id = true),
-            @Result(column = "name", property = "name"),
+            @Result(column = "login", property = "login"),
             @Result(column = "email", property = "email"),
             @Result(column = "birthday", property = "birthday"),
             @Result(column = "id_user", property = "roles", many = @Many(select =  "selectRolesByIdUser"))
@@ -61,10 +61,10 @@ public interface UserMapper {
     @Select({
             SELECT_ALL,
             FROM_USER,
-            "where name = #{name}"
+            "where login = #{login}"
     })
     @ResultMap(USER_RESULT)
-    User findByName(String name);
+    User findByLogin(String login);
 
     @Select({
             "select r.id_role, r.name",
@@ -87,10 +87,10 @@ public interface UserMapper {
     @Select({
             SELECT_ALL,
             FROM_USER,
-            "where name = #{name}"
+            "where login = #{login}"
     })
     @ResultMap(USER_RESULT)
-    User selectByName(String name);
+    User selectByLogin(String login);
 
     @Select({
             SELECT_ALL,

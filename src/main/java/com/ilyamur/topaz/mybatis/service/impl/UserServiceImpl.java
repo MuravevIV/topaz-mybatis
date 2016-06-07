@@ -70,8 +70,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByName(String name) {
-        return mapper.selectByName(name);
+    public User findByLogin(String login) {
+        return mapper.selectByLogin(login);
     }
 
     @Override
