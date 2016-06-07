@@ -138,7 +138,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveTwoUsersWithSameLoginSimultaneously_savesOnlyFirstUserAndThrowsLoginExistsException()
+    public void saveTwoUsersWithSameLoginSimultaneously_doNotSaveAnyUserAndThrowsLoginExistsException()
             throws LoginExistsException, EmailExistsException {
 
         String sameLogin = "BigBy";
