@@ -39,7 +39,7 @@ public class UserServiceImplTest {
     private static final int EXISTING_ID_USER = 0;
     private static final String EXISTING_LOGIN = "John";
     private static final String ANY_LOGIN = "Dan";
-    private static final String ANY_EMAIL = "dan@gmail.com";
+    private static final String ANY_EMAIL = "any@gmail.com";
     private static final LocalDate ANY_BIRTHDAY = LocalDate.of(1990, Month.APRIL, 27);
     private static final HashSet<Role> ANY_ROLES = Sets.newHashSet(Role.REGISTERED_USER, Role.ADMIN);
 
