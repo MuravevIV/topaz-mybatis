@@ -1,16 +1,16 @@
 package com.ilyamur.topaz.mybatis.service.impl;
 
-import com.google.common.collect.Lists;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
 import com.ilyamur.topaz.mybatis.mapper.UserMapper;
 import com.ilyamur.topaz.mybatis.service.UserService;
 import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
+
+import com.google.common.collect.Lists;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @Transactional(rollbackFor = EmailExistsException.class)
     public User save(User user) throws EmailExistsException {
         if (user != null) {
             try {
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    @Transactional(rollbackFor = EmailExistsException.class)
     public Collection<User> saveAll(Collection<User> users) throws EmailExistsException {
         ArrayList<User> savedUsers = Lists.newArrayList();
         for (User user : users) {

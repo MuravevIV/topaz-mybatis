@@ -3,16 +3,16 @@ package com.ilyamur.topaz.mybatis.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import com.ilyamur.topaz.mybatis.ApplicationConfiguration;
 import com.ilyamur.topaz.mybatis.ApplicationProfile;
-import com.ilyamur.topaz.mybatis.service.DatabaseReset;
 import com.ilyamur.topaz.mybatis.entity.Role;
 import com.ilyamur.topaz.mybatis.entity.User;
+import com.ilyamur.topaz.mybatis.service.DatabaseReset;
 import com.ilyamur.topaz.mybatis.service.UserService;
 import com.ilyamur.topaz.mybatis.service.exception.EmailExistsException;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -111,15 +111,14 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void saveTwoUsersWithSameEmail_throwsEmailExistsException() throws EmailExistsException {
+    public void saveTwoUsersWithSameEmailSequentially_savesOnlyFirstUserAndThrowsEmailExistsException() throws EmailExistsException {
         String sameEmail = "same@gmail.com";
-
         String userAbbyName = "Abby";
         User userAbby = createUser(userAbbyName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
-        target.save(userAbby);
-
         String userBrianName = "Brian";
         User userBrian = createUser(userBrianName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+
+        target.save(userAbby);
         EmailExistsException exc = null;
         try {
             target.save(userBrian);
@@ -130,6 +129,27 @@ public class UserServiceImplTest {
         assertNotNull("EmailExistsException expected", exc);
         assertEquals(String.format(EmailExistsException.MESSAGE, sameEmail), exc.getMessage());
         assertNotNull("User SHOULD be persisted in database", target.findByName(userAbbyName));
+        assertNull("User SHOULD NOT be persisted in database", target.findByName(userBrianName));
+    }
+
+    @Test
+    public void saveTwoUsersWithSameEmailSimultaneously_doNotSaveAnyUserAndThrowsEmailExistsException() throws EmailExistsException {
+        String sameEmail = "same@gmail.com";
+        String userAbbyName = "Abby";
+        User userAbby = createUser(userAbbyName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+        String userBrianName = "Brian";
+        User userBrian = createUser(userBrianName, sameEmail, ANY_BIRTHDAY, ANY_ROLES);
+
+        EmailExistsException exc = null;
+        try {
+            target.saveAll(Lists.newArrayList(userAbby, userBrian));
+        } catch (EmailExistsException e) {
+            exc = e;
+        }
+
+        assertNotNull("EmailExistsException expected", exc);
+        assertEquals(String.format(EmailExistsException.MESSAGE, sameEmail), exc.getMessage());
+        assertNull("User SHOULD NOT be persisted in database", target.findByName(userAbbyName));
         assertNull("User SHOULD NOT be persisted in database", target.findByName(userBrianName));
     }
 
